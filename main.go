@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	glog "log"
 	"net/url"
 	"os"
 	"os/signal"
@@ -12,6 +13,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/garyburd/redigo/redis"
 	"github.com/juju/loggo"
+	"github.com/rcrowley/go-metrics"
 	"github.com/streadway/amqp"
 	"github.com/wolfeidau/punter"
 )
@@ -44,8 +46,18 @@ func main() {
 		panic(err)
 	}
 
+	c := metrics.NewCounter()
+	metrics.Register("state_messages_processed", c)
+
+	t := metrics.NewTimer()
+	metrics.Register("state_messages_processed_time", t)
+
+	go metrics.Log(metrics.DefaultRegistry, 30e9, glog.New(os.Stderr, "metrics: ", glog.Lmicroseconds))
+
 	ss := &stateStore{
 		pool: newPool(rurl.Host),
+		c:    c,
+		t:    t,
 	}
 
 	consumer, err := punter.NewConsumer(*rabbitmqURL, "amq.topic", "topic", "stateservice", routingKey, "stateservice-consumer", ss.stateHandler)
@@ -87,10 +99,14 @@ func newPool(server string) *redis.Pool {
 
 type stateStore struct {
 	pool *redis.Pool
+	c    metrics.Counter
+	t    metrics.Timer
 }
 
 func (ss *stateStore) stateHandler(deliveries <-chan amqp.Delivery, done chan error) {
 	for d := range deliveries {
+
+		ss.c.Inc(1)
 
 		start := time.Now()
 
@@ -106,9 +122,8 @@ func (ss *stateStore) stateHandler(deliveries <-chan amqp.Delivery, done chan er
 			log.Errorf("failed to process payload: %s", err)
 		}
 
-		log.Debugf("Time Taken: %v", time.Since(start))
-
 		d.Ack(false)
+		ss.t.UpdateSince(start)
 	}
 	log.Debugf("handle: deliveries channel closed")
 	done <- nil
