@@ -12,6 +12,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/garyburd/redigo/redis"
 	"github.com/juju/loggo"
+	"github.com/ninjablocks/sphere-go-state-service/stats"
 	"github.com/rcrowley/go-metrics"
 	"github.com/rcrowley/go-metrics/librato"
 	"github.com/streadway/amqp"
@@ -57,6 +58,7 @@ func main() {
 	//	go metrics.Log(metrics.DefaultRegistry, 30e9, glog.New(os.Stderr, "metrics: ", glog.Lmicroseconds))
 
 	mustStartLibrato()
+	stats.StartRuntimeMetricsJob("prod")
 
 	ss := &stateStore{
 		pool: newPool(rurl.Host),
