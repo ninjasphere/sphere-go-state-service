@@ -11,6 +11,7 @@ import (
 	"github.com/alecthomas/kingpin"
 	"github.com/garyburd/redigo/redis"
 	"github.com/juju/loggo"
+	"github.com/ninjablocks/sphere-go-state-service/health"
 	"github.com/ninjablocks/sphere-go-state-service/stats"
 	"github.com/rcrowley/go-metrics"
 	"github.com/rcrowley/go-metrics/librato"
@@ -23,6 +24,7 @@ var (
 	redisURL    = kingpin.Flag("redis", "REDIS url.").Default("redis://localhost:6379").OverrideDefaultFromEnvar("REDIS_URL").String()
 	rabbitmqURL = kingpin.Flag("rabbitmq", "rabbitmq url.").Default("amqp://guest:guest@localhost:5672").OverrideDefaultFromEnvar("RABBIT_URL").String()
 	libratoKey  = kingpin.Flag("libratoKey", "Librato API key.").OverrideDefaultFromEnvar("LIBRATO_KEY").String()
+	statusAddr  = kingpin.Flag("statusAddr", "Address to assign to the status listener.").OverrideDefaultFromEnvar("PORT").Default(":6100").String()
 
 	log = loggo.GetLogger("state-service")
 
@@ -79,6 +81,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	health.StartHttpListener(*statusAddr, BuildInfo)
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, os.Interrupt, os.Kill)

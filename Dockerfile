@@ -12,10 +12,9 @@ RUN  go build -ldflags " \
        -X main.buildVersion  $(grep "const Version " version.go | sed -E 's/.*"(.+)"$/\1/' ) \
        -X main.buildRevision $(git rev-parse --short HEAD) \
        -X main.buildBranch   $(git rev-parse --abbrev-ref HEAD) \
-       -X main.buildUser     root \
        -X main.buildDate     $(date +%Y%m%d-%H:%M:%S) \
        -X main.goVersion     $GOLANG_VERSION \
      "
 
-EXPOSE     9090
+EXPOSE     6100
 CMD        ./sphere-go-state-service

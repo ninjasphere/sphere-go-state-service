@@ -5,7 +5,6 @@ var (
 	buildVersion  string
 	buildRevision string
 	buildBranch   string
-	buildUser     string
 	buildDate     string
 	goVersion     string
 )
@@ -16,7 +15,6 @@ var BuildInfo = map[string]string{
 	"version":    buildVersion,
 	"revision":   buildRevision,
 	"branch":     buildBranch,
-	"user":       buildUser,
 	"date":       buildDate,
 	"go_version": goVersion,
 }

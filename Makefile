@@ -2,7 +2,7 @@ PROJECT ?= sphere-state-service
 EB_BUCKET ?= ninjablocks-sphere-docker
 
 APP_NAME ?= sphere-state-service
-APP_ENV ?= sphere-state-service-prod
+APP_ENV ?= sphere-state-prod
 
 DOCKER_ARGS ?= -H dockerhost:5555
 SHA1 := $(shell git rev-parse --short HEAD | tr -d "\n")
@@ -16,7 +16,7 @@ build:
 	docker ${DOCKER_ARGS} build -t "docker-registry.sphere.ninja/ninjablocks/${PROJECT}:${SHA1}" .
 
 local:
-	docker ${DOCKER_ARGS} run -t -i --rm --link ninja-rabbit:rabbitmq --link ninja-redis:redis -e "RABBIT_URL=amqp://guest:guest@rabbitmq:5672" -e "REDIS_URL=redis://redis:6379/" -p 5200:5200 -t "docker-registry.sphere.ninja/ninjablocks/${PROJECT}:${SHA1}"
+	docker ${DOCKER_ARGS} run -t -i --rm --link ninja-rabbit:rabbitmq --link ninja-redis:redis -e "RABBIT_URL=amqp://guest:guest@rabbitmq:5672" -e "REDIS_URL=redis://redis:6379/" -p 6100:6100 -t "docker-registry.sphere.ninja/ninjablocks/${PROJECT}:${SHA1}"
 
 deploy:
 	docker ${DOCKER_ARGS} push "docker-registry.sphere.ninja/ninjablocks/${PROJECT}:${SHA1}"
