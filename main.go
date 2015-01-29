@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	glog "log"
 	"net/url"
 	"os"
 	"os/signal"
@@ -14,6 +13,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/juju/loggo"
 	"github.com/rcrowley/go-metrics"
+	"github.com/rcrowley/go-metrics/librato"
 	"github.com/streadway/amqp"
 	"github.com/wolfeidau/punter"
 )
@@ -22,6 +22,7 @@ var (
 	debug       = kingpin.Flag("debug", "Enable debug mode.").Bool()
 	redisURL    = kingpin.Flag("redis", "REDIS url.").Default("redis://localhost:6379").OverrideDefaultFromEnvar("REDIS_URL").String()
 	rabbitmqURL = kingpin.Flag("rabbitmq", "rabbitmq url.").Default("amqp://guest:guest@localhost:5672").OverrideDefaultFromEnvar("RABBIT_URL").String()
+	libratoKey  = kingpin.Flag("libratoKey", "Librato API key.").OverrideDefaultFromEnvar("LIBRATO_KEY").String()
 
 	log = loggo.GetLogger("state-service")
 
@@ -42,6 +43,7 @@ func main() {
 	}
 
 	rurl, err := url.Parse(*redisURL)
+
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +54,9 @@ func main() {
 	t := metrics.NewTimer()
 	metrics.Register("state_messages_processed_time", t)
 
-	go metrics.Log(metrics.DefaultRegistry, 30e9, glog.New(os.Stderr, "metrics: ", glog.Lmicroseconds))
+	//	go metrics.Log(metrics.DefaultRegistry, 30e9, glog.New(os.Stderr, "metrics: ", glog.Lmicroseconds))
+
+	mustStartLibrato()
 
 	ss := &stateStore{
 		pool: newPool(rurl.Host),
@@ -95,6 +99,31 @@ func newPool(server string) *redis.Pool {
 			return err
 		},
 	}
+}
+
+func mustStartLibrato() {
+
+	hostname, err := os.Hostname()
+
+	if err != nil {
+		panic(err)
+	}
+
+	log.Infof("hostname %+v", hostname)
+
+	if *libratoKey == "" {
+		log.Warningf("skipping librato job as no key is set.")
+		return
+	}
+
+	go librato.Librato(metrics.DefaultRegistry,
+		30e9, // interval
+		"services@ninjablocks.com", // account owner email address
+		*libratoKey,                // Librato API token
+		hostname,                   // source
+		[]float64{0.95},            // precentiles to send
+		time.Millisecond,           // time unit
+	)
 }
 
 type stateStore struct {
