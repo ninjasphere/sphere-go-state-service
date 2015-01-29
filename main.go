@@ -24,7 +24,7 @@ var (
 	log = loggo.GetLogger("state-service")
 
 	routingKey = "*.$cloud.*.channel.*.event.state"
-	userRegex  = regexp.MustCompile(`^(?P<user_id>\w+).\$cloud.(?P<device_id>\w_]+).channel.(?P<channel_id>[a-zA-Z0-9-_]+).event.state$`)
+	userRegex  = regexp.MustCompile(`^(?P<user_id>\w+).\$cloud.(?P<device_id>\w+).channel.(?P<channel_id>[a-zA-Z0-9-_]+).event.state$`)
 )
 
 func main() {
