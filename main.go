@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/alecthomas/kingpin"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/garyburd/redigo/redis"
 	"github.com/juju/loggo"
 	"github.com/ninjablocks/sphere-go-state-service/stats"
@@ -29,6 +28,8 @@ var (
 
 	routingKey = "*.$cloud.*.channel.*.event.state"
 	userRegex  = regexp.MustCompile(`^(?P<user_id>\w+).\$cloud.(?P<device_id>\w+).channel.(?P<channel_id>[a-zA-Z0-9-_]+).event.state$`)
+
+	hostname = "unknown"
 )
 
 func main() {
@@ -49,6 +50,14 @@ func main() {
 		panic(err)
 	}
 
+	hostname, err = os.Hostname()
+
+	if err != nil {
+		panic(err)
+	}
+
+	log.Infof("hostname %+v", hostname)
+
 	c := metrics.NewCounter()
 	metrics.Register("state_messages_processed", c)
 
@@ -57,7 +66,7 @@ func main() {
 
 	//	go metrics.Log(metrics.DefaultRegistry, 30e9, glog.New(os.Stderr, "metrics: ", glog.Lmicroseconds))
 
-	mustStartLibrato()
+	startLibrato()
 	stats.StartRuntimeMetricsJob("prod")
 
 	ss := &stateStore{
@@ -103,15 +112,7 @@ func newPool(server string) *redis.Pool {
 	}
 }
 
-func mustStartLibrato() {
-
-	hostname, err := os.Hostname()
-
-	if err != nil {
-		panic(err)
-	}
-
-	log.Infof("hostname %+v", hostname)
+func startLibrato() {
 
 	if *libratoKey == "" {
 		log.Warningf("skipping librato job as no key is set.")
@@ -180,7 +181,7 @@ func (ss *stateStore) savePayload(body []byte, routingKey string) error {
 		return err
 	}
 
-	log.Debugf(spew.Sprintf("n = %v", n))
+	log.Debugf("n = %v", n)
 
 	return nil
 }
