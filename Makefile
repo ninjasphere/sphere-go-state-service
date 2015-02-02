@@ -15,8 +15,12 @@ all: build deploy
 build:
 	docker ${DOCKER_ARGS} build -t "docker-registry.sphere.ninja/ninjablocks/${PROJECT}:${SHA1}" .
 
+services:
+	docker ${DOCKER_ARGS} run --name ninja-rabbit -p 5672:5672 -p 15672:15672 -d mikaelhg/docker-rabbitmq
+	docker ${DOCKER_ARGS} run --name ninja-redis -d redis
+
 local:
-	docker ${DOCKER_ARGS} run -t -i --rm --link ninja-rabbit:rabbitmq --link ninja-redis:redis -e "RABBIT_URL=amqp://guest:guest@rabbitmq:5672" -e "REDIS_URL=redis://redis:6379/" -p 6100:6100 -t "docker-registry.sphere.ninja/ninjablocks/${PROJECT}:${SHA1}"
+	docker ${DOCKER_ARGS} run -t -i --rm --link ninja-rabbit:rabbitmq --link ninja-redis:redis -e "RABBIT_URL=amqp://guest:guest@rabbitmq:5672" -e "REDIS_URL=redis://redis:6379/" -e "DEBUG=true" -p 6100:6100 -t "docker-registry.sphere.ninja/ninjablocks/${PROJECT}:${SHA1}"
 
 deploy:
 	docker ${DOCKER_ARGS} push "docker-registry.sphere.ninja/ninjablocks/${PROJECT}:${SHA1}"
@@ -37,4 +41,4 @@ clean:
 	rm ${DOCKERRUN_FILE} || true
 	rm -rf build || true
 
-.PHONY: all build local deploy clean
+.PHONY: all build local services deploy clean

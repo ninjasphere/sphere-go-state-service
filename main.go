@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	debug       = kingpin.Flag("debug", "Enable debug mode.").Bool()
+	debug       = kingpin.Flag("debug", "Enable debug mode.").OverrideDefaultFromEnvar("DEBUG").Bool()
 	redisURL    = kingpin.Flag("redis", "REDIS url.").Default("redis://localhost:6379").OverrideDefaultFromEnvar("REDIS_URL").String()
 	rabbitmqURL = kingpin.Flag("rabbitmq", "rabbitmq url.").Default("amqp://guest:guest@localhost:5672").OverrideDefaultFromEnvar("RABBIT_URL").String()
 	libratoKey  = kingpin.Flag("libratoKey", "Librato API key.").OverrideDefaultFromEnvar("LIBRATO_KEY").String()
@@ -28,8 +28,8 @@ var (
 
 	log = loggo.GetLogger("state-service")
 
-	routingKey = "*.$cloud.*.channel.*.event.state"
-	userRegex  = regexp.MustCompile(`^(?P<user_id>\w+).\$cloud.(?P<device_id>\w+).channel.(?P<channel_id>[a-zA-Z0-9-_]+).event.state$`)
+	routingKey = "*.$cloud.device.*.channel.*.event.state"
+	userRegex  = regexp.MustCompile(`^(?P<user_id>\w+).\$cloud.device.(?P<device_id>\w+).channel.(?P<channel_id>[a-zA-Z0-9-_]+).event.state$`)
 
 	hostname = "unknown"
 )
@@ -77,7 +77,7 @@ func main() {
 		t:    t,
 	}
 
-	consumer, err := punter.NewConsumer(*rabbitmqURL, "amq.topic", "topic", "stateservice", routingKey, "stateservice-consumer", ss.stateHandler)
+	consumer, err := punter.NewConsumer(*rabbitmqURL, "amq.topic", "topic", "stateservice", routingKey, fmt.Sprintf("stateservice-consumer-%s", hostname), ss.stateHandler)
 	if err != nil {
 		panic(err)
 	}
@@ -147,7 +147,8 @@ func (ss *stateStore) stateHandler(deliveries <-chan amqp.Delivery, done chan er
 		start := time.Now()
 
 		log.Debugf(
-			"got %dB delivery: [%v]",
+			"amqp key: %s payload: %dB delivery: [%v]",
+			d.RoutingKey,
 			len(d.Body),
 			d.DeliveryTag,
 		)
@@ -185,7 +186,7 @@ func (ss *stateStore) savePayload(body []byte, routingKey string) error {
 		return err
 	}
 
-	log.Debugf("n = %v", n)
+	log.Debugf("redis key = %s n = %v", key, n)
 
 	return nil
 }
