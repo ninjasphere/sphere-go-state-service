@@ -29,7 +29,7 @@ var (
 	log = loggo.GetLogger("state-service")
 
 	routingKey = "*.$cloud.device.*.channel.*.event.state"
-	userRegex  = regexp.MustCompile(`^(?P<user_id>\w+).\$cloud.device.(?P<device_id>\w+).channel.(?P<channel_id>[a-zA-Z0-9-_]+).event.state$`)
+	userRegex  = regexp.MustCompile(`^(?P<user_id>[a-zA-Z0-9-_]+).\$cloud.device.(?P<device_id>\w+).channel.(?P<channel_id>[a-zA-Z0-9-_]+).event.state$`)
 
 	hostname = "unknown"
 )
@@ -61,10 +61,10 @@ func main() {
 	log.Infof("hostname %+v", hostname)
 
 	c := metrics.NewCounter()
-	metrics.Register("state_messages_processed", c)
+	metrics.Register("timeseries.messages_processed", c)
 
 	t := metrics.NewTimer()
-	metrics.Register("state_messages_processed_time", t)
+	metrics.Register("timeseries.messages_processed_time", t)
 
 	//	go metrics.Log(metrics.DefaultRegistry, 30e9, glog.New(os.Stderr, "metrics: ", glog.Lmicroseconds))
 
