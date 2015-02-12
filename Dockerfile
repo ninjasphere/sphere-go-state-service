@@ -1,7 +1,7 @@
 FROM       golang:1.4
 MAINTAINER Ninja Blocks <developers@ninjablocks.com>
 
-RUN        apt-get -qy update && apt-get -qy install vim-common gcc mercurial
+RUN        apt-get -qy update && apt-get -qy install vim-common gcc mercurial supervisor
 
 WORKDIR    /go/src/github.com/ninjablocks/sphere-go-state-service
 ADD        . /go/src/github.com/ninjablocks/sphere-go-state-service
@@ -17,4 +17,4 @@ RUN  go build -ldflags " \
      "
 
 EXPOSE     6100
-CMD        ./sphere-go-state-service
+CMD ["/usr/bin/supervisord"]

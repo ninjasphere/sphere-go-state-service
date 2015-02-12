@@ -21,6 +21,7 @@ import (
 
 var (
 	debug       = kingpin.Flag("debug", "Enable debug mode.").OverrideDefaultFromEnvar("DEBUG").Bool()
+	workers     = kingpin.Flag("workers", "Configure the number of workers.").Default("4").OverrideDefaultFromEnvar("WORKERS").Int()
 	redisURL    = kingpin.Flag("redis", "REDIS url.").Default("redis://localhost:6379").OverrideDefaultFromEnvar("REDIS_URL").String()
 	rabbitmqURL = kingpin.Flag("rabbitmq", "rabbitmq url.").Default("amqp://guest:guest@localhost:5672").OverrideDefaultFromEnvar("RABBIT_URL").String()
 	libratoKey  = kingpin.Flag("libratoKey", "Librato API key.").OverrideDefaultFromEnvar("LIBRATO_KEY").String()
@@ -77,9 +78,26 @@ func main() {
 		t:    t,
 	}
 
-	consumer, err := punter.NewConsumer(*rabbitmqURL, "amq.topic", "topic", "stateservice", routingKey, fmt.Sprintf("stateservice-consumer-%s", hostname), ss.stateHandler)
-	if err != nil {
-		panic(err)
+	consumers := []*punter.Consumer{}
+
+	conf := &punter.Config{
+		AmqpURI:      *rabbitmqURL,
+		Exchange:     "amq.topic",
+		ExchangeType: "topic",
+		QueueName:    "stateservice",
+		Key:          routingKey,
+		MessageTTL:   int32(600000), // How long to retain messages in the queue (10 minutes)
+		Durable:      false,         // Queue durable?
+	}
+
+	for i := 0; i < *workers; i++ {
+
+		consumer, err := punter.NewConsumer(conf, fmt.Sprintf("stateservice-consumer-%s", hostname), ss.stateHandler)
+		if err != nil {
+			panic(err)
+		}
+
+		consumers = append(consumers, consumer)
 	}
 
 	health.StartHttpListener(*statusAddr, BuildInfo)
@@ -92,8 +110,12 @@ func main() {
 	log.Warningf("Got signal: %v", s)
 
 	log.Warningf("shutting down consumer")
-	if err := consumer.Shutdown(); err != nil {
-		log.Errorf("error during shutdown: %s", err)
+
+	for n, consumer := range consumers {
+		log.Infof("shutting down consumer %d", n)
+		if err := consumer.Shutdown(); err != nil {
+			log.Infof("error during shutdown: %s", err)
+		}
 	}
 
 }
