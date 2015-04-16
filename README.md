@@ -1,6 +1,6 @@
 # sphere-go-state-service
 
-This service takes state messages from AMQP and stores them in REDIS.
+This service takes state messages from AMQP and stores them in REDIS for use by the api-service which uses it this to populate the state information in rest calls for devices.
 
 # Docker 
 
