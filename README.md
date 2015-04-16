@@ -25,3 +25,7 @@ docker run --name ninja-redis -d redis
 
 {"params":[{"media":{"id":"x-sonos-spotify:spotify%3atrack%3a3FUS56gKr9mVBmzvlnodlh?sid=12\u0026flags=32\u0026sn=1","type":"music-track","title":"Killing In The Name","duration":314000,"artists":[{"name":"Rage Against The Machine"}],"album":{"name":"Rage Against The Machine"}},"position":239000}],"jsonrpc":"2.0","time":1422501658309}
 ```
+
+# Licensing
+
+sphere-go-state-service is licensed under the MIT License. See LICENSE for the full license text.
