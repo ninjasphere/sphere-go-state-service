@@ -1,0 +1,66 @@
+{
+	"ImportPath": "github.com/ninjasphere/sphere-go-state-service",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v60",
+	"Deps": [
+		{
+			"ImportPath": "github.com/alecthomas/kingpin",
+			"Comment": "v2.1.11-13-gb3e2dde",
+			"Rev": "b3e2dde5034607a4446a4d5025baf43378e03203"
+		},
+		{
+			"ImportPath": "github.com/alecthomas/template",
+			"Rev": "14fd436dd20c3cc65242a9f396b61bfc8a3926fc"
+		},
+		{
+			"ImportPath": "github.com/alecthomas/template/parse",
+			"Rev": "14fd436dd20c3cc65242a9f396b61bfc8a3926fc"
+		},
+		{
+			"ImportPath": "github.com/alecthomas/units",
+			"Rev": "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry/gosigar",
+			"Comment": "scotty_09012012-21-gd906efd",
+			"Rev": "d906efd1da51405714ee9b67c79cf14cdb58fd29"
+		},
+		{
+			"ImportPath": "github.com/garyburd/redigo/internal",
+			"Rev": "a47585eaae68b1d14b02940d2af1b9194f3caa9c"
+		},
+		{
+			"ImportPath": "github.com/garyburd/redigo/redis",
+			"Rev": "a47585eaae68b1d14b02940d2af1b9194f3caa9c"
+		},
+		{
+			"ImportPath": "github.com/juju/loggo",
+			"Rev": "8477fc936adf0e382d680310047ca27e128a309a"
+		},
+		{
+			"ImportPath": "github.com/ninjablocks/sphere-go-state-service/health",
+			"Rev": "51bf739ef94e998f1129e41715c1ab1632ffa84f"
+		},
+		{
+			"ImportPath": "github.com/ninjablocks/sphere-go-state-service/stats",
+			"Rev": "51bf739ef94e998f1129e41715c1ab1632ffa84f"
+		},
+		{
+			"ImportPath": "github.com/rcrowley/go-metrics",
+			"Rev": "3e5e593311103d49927c8d2b0fd93ccdfe4a525c"
+		},
+		{
+			"ImportPath": "github.com/rcrowley/go-metrics/librato",
+			"Rev": "3e5e593311103d49927c8d2b0fd93ccdfe4a525c"
+		},
+		{
+			"ImportPath": "github.com/streadway/amqp",
+			"Rev": "150b7f24d6ad507e6026c13d85ce1f1391ac7400"
+		},
+		{
+			"ImportPath": "github.com/wolfeidau/punter",
+			"Comment": "v1.2.1",
+			"Rev": "7adeff1e0da9d0a5ad420343cd223ee3a9c741a1"
+		}
+	]
+}
