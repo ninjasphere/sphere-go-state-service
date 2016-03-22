@@ -5,6 +5,8 @@ RUN        apt-get -qy update && apt-get -qy install vim-common gcc mercurial su
 
 
 COPY build/sphere-go-state-service /app/
+ADD etc/supervisord.conf /app/etc/
+
 WORKDIR /app
 
 EXPOSE     6100
